@@ -38,5 +38,8 @@ class PaymentController {
   }
 }
 
-export const { createPayment, getPaymentStatus, refundPayment, getDisputeById } = PaymentController;
+export const { createPayment,
+  getPaymentStatus,
+  refundPayment,
+  getDisputeById } = PaymentController;
 export default PaymentController;

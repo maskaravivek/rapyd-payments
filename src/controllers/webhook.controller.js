@@ -16,9 +16,6 @@ export const handleWebhook = (req, res) => {
             console.log('Payment dispute created:', event.data);
             handleDisputeCreated(event.data);
             break;
-        case 'PAYMENT_DISPUTE_UPDATED':
-            console.log('Payment dispute updated:', event.data);
-            break;
         default:
             console.log('Unhandled event type:', event.type);
     }
@@ -27,15 +24,12 @@ export const handleWebhook = (req, res) => {
 };
 
 const handleDisputeCreated = async (disputeData) => {
-    const { token, amount, original_transaction_id } = disputeData;
+    const { token, original_dispute_amount, original_transaction_id } = disputeData;
 
     console.log(`Dispute ID: ${token}`);
 
     try {
-        const dispute = await RapydService.getDisputeById(token);
-        console.log('Retrieved dispute:', dispute);
-
-        if (amount < 50) {
+        if (original_dispute_amount < 50) {
             const refundData = {
                 payment: original_transaction_id,
                 "metadata": {
@@ -45,12 +39,11 @@ const handleDisputeCreated = async (disputeData) => {
                 "reason": "Refund for dispute",
             };
 
-            const payment = await RapydService.refundPayment(refundData)
-            console.log('Dispute created:', payment);
-
+            await RapydService.refundPayment(refundData)
             console.log(`Refund initiated for transaction: ${original_transaction_id}`);
         } else {
-            console.log(`Dispute amount ${amount} exceeds threshold, no refund initiated.`);
+            // Notify the merchant about the dispute
+            console.log(`Notify merchant about dispute for transaction: ${original_transaction_id}`);
         }
     } catch (error) {
         console.error('Error handling dispute:', error);
