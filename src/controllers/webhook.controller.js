@@ -18,7 +18,6 @@ export const handleWebhook = (req, res) => {
             break;
         case 'PAYMENT_DISPUTE_UPDATED':
             console.log('Payment dispute updated:', event.data);
-            handleDisputeUpdated(event.data);
             break;
         default:
             console.log('Unhandled event type:', event.type);
@@ -28,19 +27,6 @@ export const handleWebhook = (req, res) => {
 };
 
 const handleDisputeCreated = async (disputeData) => {
-    const { token } = disputeData;
-
-    console.log(`Dispute ID: ${token}`);
-
-    try {
-        const dispute = await RapydService.getDisputeById(token);
-        console.log('Dispute created:', dispute);
-    } catch (error) {
-        console.error('Error handling dispute:', error);
-    }
-};
-
-const handleDisputeUpdated = async (disputeData) => {
     const { token, amount, original_transaction_id } = disputeData;
 
     console.log(`Dispute ID: ${token}`);
@@ -60,7 +46,7 @@ const handleDisputeUpdated = async (disputeData) => {
             };
 
             const payment = await RapydService.refundPayment(refundData)
-            console.log('Dispute updated:', payment);
+            console.log('Dispute created:', payment);
 
             console.log(`Refund initiated for transaction: ${original_transaction_id}`);
         } else {
