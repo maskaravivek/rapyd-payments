@@ -1,4 +1,4 @@
-import RapydService from '../services/rapyd.service.js';
+import EmailService from '../services/email.service.js';
 
 export const handleWebhook = (req, res) => {
     const event = req.body;
@@ -24,27 +24,12 @@ export const handleWebhook = (req, res) => {
 };
 
 const handleDisputeCreated = async (disputeData) => {
-    const { token, original_dispute_amount, original_transaction_id } = disputeData;
-
+    const { token } = disputeData;
     console.log(`Dispute ID: ${token}`);
 
     try {
-        if (original_dispute_amount < 50) {
-            const refundData = {
-                payment: original_transaction_id,
-                "metadata": {
-                    "merchant_defined": true
-                },
-                "merchant_reference_id": "CA1234567",
-                "reason": "Refund for dispute",
-            };
-
-            await RapydService.refundPayment(refundData)
-            console.log(`Refund initiated for transaction: ${original_transaction_id}`);
-        } else {
-            // Notify the merchant about the dispute
-            console.log(`Notify merchant about dispute for transaction: ${original_transaction_id}`);
-        }
+        await EmailService.sendDisputeNotification(disputeData);
+        console.log(`Email notification sent for dispute: ${token}`);
     } catch (error) {
         console.error('Error handling dispute:', error);
     }
